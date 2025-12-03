@@ -29,18 +29,67 @@ module.exports = {
     },
 
     create: (req, res) => {
-        const { fecha, total, id_cliente } = req.body;
+    const { id_cliente, detalles } = req.body;
 
-        db.run(
-            "INSERT INTO pedidos (fecha, total, id_cliente) VALUES (?, ?, ?)",
-            [fecha, total, id_cliente],
-            function (err) {
-                if (err) return res.status(500).json({ error: err.message });
+    if (!detalles || detalles.length === 0) {
+        return res.status(400).json({ error: "Debe enviar detalles del pedido" });
+    }
 
-                res.json({ id: this.lastID, message: "Pedido creado" });
-            }
-        );
-    },
+    const idsProductos = detalles.map(d => d.id_producto);
+
+    const placeholders = idsProductos.map(() => "?").join(",");
+    const query = `SELECT id, precio FROM productos WHERE id IN (${placeholders})`;
+
+    db.all(query, idsProductos, (err, productos) => {
+        if (err) return res.status(500).json({ error: err.message });
+
+        if (productos.length !== idsProductos.length) {
+            return res.status(400).json({ error: "Uno o más productos no existen" });
+        }
+
+        let total = 0;
+        const preciosMap = {};
+        productos.forEach(p => preciosMap[p.id] = p.precio);
+
+        detalles.forEach(det => {
+            total += preciosMap[det.id_producto] * det.cantidad;
+        });
+
+        const fecha = new Date().toISOString().split("T")[0];
+
+        const insertPedidoQuery = `
+            INSERT INTO pedidos (fecha, total, id_cliente)
+            VALUES (?, ?, ?)
+        `;
+
+        db.run(insertPedidoQuery, [fecha, total, id_cliente], function (err) {
+            if (err) return res.status(500).json({ error: err.message });
+
+            const id_pedido = this.lastID;
+
+            const insertDetalle = `
+                INSERT INTO detalles (id_pedido, id_producto, cantidad, precio_unitario)
+                VALUES (?, ?, ?, ?)
+            `;
+
+            detalles.forEach(det => {
+                db.run(insertDetalle, [
+                    id_pedido,
+                    det.id_producto,
+                    det.cantidad,
+                    preciosMap[det.id_producto]
+                ]);
+            });
+
+            res.json({
+                id_pedido,
+                total,
+                message: "Pedido creado con detalles correctamente"
+            });
+        });
+    });
+},
+
 
     update: (req, res) => {
         const { fecha, total, id_cliente } = req.body;
