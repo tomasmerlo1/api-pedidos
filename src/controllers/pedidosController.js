@@ -28,6 +28,38 @@ module.exports = {
         });
     },
 
+    getPedidoCompleto: (req, res) => {
+    const id = req.params.id;
+
+    const pedidoQuery = `
+        SELECT pedidos.*, clientes.nombre AS cliente_nombre
+        FROM pedidos
+        LEFT JOIN clientes ON pedidos.id_cliente = clientes.id
+        WHERE pedidos.id = ?
+    `;
+
+    db.get(pedidoQuery, [id], (err, pedido) => {
+        if (err) return res.status(500).json({ error: err.message });
+        if (!pedido) return res.status(404).json({ error: "Pedido no encontrado" });
+
+        const detallesQuery = `
+            SELECT detalles.*, productos.nombre AS producto_nombre
+            FROM detalles
+            LEFT JOIN productos ON detalles.id_producto = productos.id
+            WHERE detalles.id_pedido = ?
+        `;
+
+        db.all(detallesQuery, [id], (err, detalles) => {
+            if (err) return res.status(500).json({ error: err.message });
+
+            pedido.detalles = detalles;
+
+            res.json(pedido);
+        });
+    });
+},
+
+
     create: (req, res) => {
     const { id_cliente, detalles } = req.body;
 
