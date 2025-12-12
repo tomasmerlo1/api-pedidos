@@ -2,52 +2,61 @@ const db = require("../config/db");
 
 module.exports = {
     getAll: (req, res) => {
-        db.all("SELECT * FROM productos", [], (err, rows) => {
-            if (err) return res.status(500).json({ error: err.message });
+        try {
+            const rows = db.prepare("SELECT * FROM productos").all();
             res.json(rows);
-        });
+        } catch (err) {
+            res.status(500).json({ error: err.message });
+        }
     },
 
     getById: (req, res) => {
-        db.get("SELECT * FROM productos WHERE id = ?", [req.params.id], (err, row) => {
-            if (err) return res.status(500).json({ error: err.message });
-            res.json(row);
-        });
+        try {
+            const row = db.prepare("SELECT * FROM productos WHERE id = ?").get(req.params.id);
+            res.json(row || {});
+        } catch (err) {
+            res.status(500).json({ error: err.message });
+        }
     },
 
     create: (req, res) => {
-        const { nombre, precio, stock } = req.body;
+        try {
+            const { nombre, precio, stock } = req.body;
+            const stmt = db.prepare(
+                "INSERT INTO productos (nombre, precio, stock) VALUES (?, ?, ?)"
+            );
 
-        db.run(
-            "INSERT INTO productos (nombre, precio, stock) VALUES (?, ?, ?)",
-            [nombre, precio, stock],
-            function (err) {
-                if (err) return res.status(500).json({ error: err.message });
-
-                res.json({ id: this.lastID, message: "Producto creado" });
-            }
-        );
+            const result = stmt.run(nombre, precio, stock);
+            res.json({ id: result.lastInsertRowid, message: "Producto creado" });
+        } catch (err) {
+            res.status(500).json({ error: err.message });
+        }
     },
 
     update: (req, res) => {
-        const { nombre, precio, stock } = req.body;
+        try {
+            const { nombre, precio, stock } = req.body;
 
-        db.run(
-            "UPDATE productos SET nombre = ?, precio = ?, stock = ? WHERE id = ?",
-            [nombre, precio, stock, req.params.id],
-            function (err) {
-                if (err) return res.status(500).json({ error: err.message });
+            const stmt = db.prepare(
+                "UPDATE productos SET nombre = ?, precio = ?, stock = ? WHERE id = ?"
+            );
 
-                res.json({ changes: this.changes, message: "Producto actualizado" });
-            }
-        );
+            const result = stmt.run(nombre, precio, stock, req.params.id);
+
+            res.json({ changes: result.changes, message: "Producto actualizado" });
+        } catch (err) {
+            res.status(500).json({ error: err.message });
+        }
     },
 
     remove: (req, res) => {
-        db.run("DELETE FROM productos WHERE id = ?", [req.params.id], function (err) {
-            if (err) return res.status(500).json({ error: err.message });
+        try {
+            const stmt = db.prepare("DELETE FROM productos WHERE id = ?");
+            const result = stmt.run(req.params.id);
 
-            res.json({ changes: this.changes, message: "Producto eliminado" });
-        });
+            res.json({ changes: result.changes, message: "Producto eliminado" });
+        } catch (err) {
+            res.status(500).json({ error: err.message });
+        }
     },
 };

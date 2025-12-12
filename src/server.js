@@ -1,27 +1,35 @@
+require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
-require("dotenv").config();
+const path = require("path");
 
-const apiKey = require("./middlewares/apiKey");
-const createTables = require("./models/createTables");
-
-const productosRoutes = require("./routes/productosRoutes");
 const clientesRoutes = require("./routes/clientesRoutes");
+const productosRoutes = require("./routes/productosRoutes");
 const pedidosRoutes = require("./routes/pedidosRoutes");
 const detallesRoutes = require("./routes/detallesRoutes");
 
 const app = express();
+
 app.use(cors());
 app.use(express.json());
 
-app.use(apiKey);
+app.use((req, res, next) => {
+    const apiKey = req.headers["x-api-key"];
 
-app.use("/productos", productosRoutes);
+    if (!apiKey || apiKey !== process.env.API_KEY) {
+        return res.status(401).json({ error: "API KEY inválida o faltante" });
+    }
+
+    next();
+});
+
 app.use("/clientes", clientesRoutes);
+app.use("/productos", productosRoutes);
 app.use("/pedidos", pedidosRoutes);
 app.use("/detalles", detallesRoutes);
 
-createTables();
-
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log("Servidor corriendo en puerto", PORT));
+
+app.listen(PORT, () => {
+    console.log(`Servidor corriendo en puerto ${PORT}`);
+});
