@@ -1,23 +1,115 @@
-# API de Pedidos — Node.js + Express + SQLite3
+## API de Pedidos — Node.js + Express + SQLite (Better-SQLite3)
 
-Proyecto desarrollado para la materia PPS / Aprobación Directa.
-El objetivo es implementar una API REST completa para gestionar clientes, productos, pedidos y detalles, utilizando Node.js, Express y SQLite3.
+Este proyecto es una API REST para la gestión de Clientes, Productos, Pedidos y Detalles de pedido, desarrollada con Node.js, Express y SQLite, y desplegada en Render.
 
-Incluye:
+Incluye endpoints CRUD completos, cálculo automático del total del pedido y una estructura organizada por rutas, controladores y base de datos.
 
-CRUD completo de entidades
-Base de datos relacional
-Protección con API Key
-Relación entre pedidos, clientes, productos y detalles
-Rutas probadas con Postman
-
-🚀 Tecnologías utilizadas
+## 🚀 Tecnologías utilizadas
 Node.js
 Express
-SQLite3
-dotenv
+Better-SQLite3
 CORS
+dotenv
+Render
+
+## URL Render
+https://api-pedidos-nnnv.onrender.com
 
 ## 🔐 API Key
+API_KEY=123456
+
+
+## Si lo vas a probar en local:
+PORT=3000
+
+## Cómo correr el proyecto en local
+    1. Tener instalado Node 20.10.0
+    2. Instalar dependencias:
+        npm install
+        npm start
+        SQLite conectado: /database.db
+        Servidor corriendo en puerto 10000
+
+## 📌 ENDPOINTS
+   
+    CLIENTES
+        Obtener todos
+            GET /clientes
+        Obtener por ID
+            GET /clientes/:id
+        Crear
+            POST /clientes
+                Content-Type: application/json
+                {
+"nombre": "Tomas Merlo",
+"telefono": "11223344",
+"direccion": "Calle Falsa 123"
+}
+        Actualizar
+            PUT /clientes/:id
+        Eliminar
+            DELETE /clientes/:id
+    
+    PRODUCTOS
+        Obtener todos
+            GET /productos
+        Obtener por ID
+            GET /productos/:id
+        Crear
+            POST /productos
+            {
+            "nombre": "Oreos",
+            "precio": 1500,
+            "stock": 20
+            }
+        Actualizar
+            PUT /productos/:id
+        Eliminar
+            DELETE /productos/:id
+
+    PEDIDOS
+        Obtener todos los pedidos
+            GET /pedidos
+        Obtener un pedido por ID
+            GET /pedidos/:id
+        Obtener pedido completo
+            GET /pedidos/completo/:id
+        Crear pedido con detalles
+            POST /pedidos
+            {
+"id_cliente": 1,
+"detalles": [
+{ "id_producto": 1, "cantidad": 2 },
+{ "id_producto": 3, "cantidad": 1 }
+]
+}
+        Actualizar pedido
+            PUT /pedidos/:id
+        Eliminar pedido
+            DELETE /pedidos/:id
+
+    DETALLES
+        Obtener todos
+            GET /detalles
+        Obtener por ID
+            GET /detalles/:id
+        Obtener detalles de un pedido
+            GET /detalles/pedido/:id_pedido
+        Crear
+            POST /detalles
+            {
+  "id_pedido": 2,
+  "id_producto": 1,
+  "cantidad": 1,
+  "precio_unitario": 5000
+}
+        Actualizar pedido
+            PUT /detalles/:id
+        Elimiar detalle
+            DELETE /detalles/:id
+
+## Postman
+https://documenter.getpostman.com/view/24379146/2sB3dTrn7z
+
 
 

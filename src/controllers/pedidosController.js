@@ -142,13 +142,26 @@ module.exports = {
 
     remove: (req, res) => {
         try {
-            const stmt = db.prepare("DELETE FROM pedidos WHERE id = ?");
-            const result = stmt.run(req.params.id);
+            const id = req.params.id;
 
-            res.json({ changes: result.changes, message: "Pedido eliminado" });
+            const delDetalles = db.prepare(`
+                DELETE FROM detalles WHERE id_pedido = ?
+            `);
+            delDetalles.run(id);
+
+            const delPedido = db.prepare(`
+                DELETE FROM pedidos WHERE id = ?
+            `);
+            const result = delPedido.run(id);
+
+            res.json({
+                changes: result.changes,
+                message: "Pedido y detalles eliminados correctamente"
+            });
 
         } catch (err) {
             res.status(500).json({ error: err.message });
         }
     },
 };
+
