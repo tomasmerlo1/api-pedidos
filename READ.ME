@@ -1,4 +1,4 @@
-## API de Pedidos — Node.js + Express + SQLite (Better-SQLite3)
+## API de Pedidos — Node.js + Express + SQLite (SQLite3)
 
 Este proyecto es una API REST para la gestión de Clientes, Productos, Pedidos y Detalles de pedido, desarrollada con Node.js, Express y SQLite, y desplegada en Render.
 
@@ -7,7 +7,7 @@ Incluye endpoints CRUD completos, cálculo automático del total del pedido y un
 ## 🚀 Tecnologías utilizadas
 Node.js
 Express
-Better-SQLite3
+SQLite3
 CORS
 dotenv
 Render
@@ -16,19 +16,29 @@ Render
 https://api-pedidos-pmbg.onrender.com
 
 ## 🔐 API Key
-API_KEY=123456
+La API Key debe enviarse en el header:
+
+x-api-key: 123456
+
 
 
 ## Si lo vas a probar en local:
 PORT=3000
 
+En Render:
+Render asigna automáticamente el puerto 10000
+
 ## Cómo correr el proyecto en local
     1. Tener instalado Node 20.10.0
     2. Instalar dependencias:
         npm install
+    3. Iniciar el servidor:
         npm start
-        SQLite conectado: /database.db
-        Servidor corriendo en puerto 10000
+    
+    Salida esperada:
+    SQLite conectado: /database.db
+    Servidor corriendo en puerto 3000
+
 
 ## 📌 ENDPOINTS
    
@@ -105,7 +115,7 @@ PORT=3000
 }
         Actualizar pedido
             PUT /detalles/:id
-        Elimiar detalle
+        Eliminar detalle
             DELETE /detalles/:id
 
 ## Postman
