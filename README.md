@@ -1,0 +1,125 @@
+## API de Pedidos — Node.js + Express + SQLite (SQLite3)
+
+Este proyecto es una API REST para la gestión de Clientes, Productos, Pedidos y Detalles de pedido, desarrollada con Node.js, Express y SQLite, y desplegada en Render.
+
+Incluye endpoints CRUD completos, cálculo automático del total del pedido y una estructura organizada por rutas, controladores y base de datos.
+
+## 🚀 Tecnologías utilizadas
+Node.js
+Express
+SQLite3
+CORS
+dotenv
+Render
+
+## URL Render
+https://api-pedidos-pmbg.onrender.com
+
+## 🔐 API Key
+La API Key debe enviarse en el header:
+
+x-api-key: 123456
+
+
+
+## Si lo vas a probar en local:
+PORT=3000
+
+En Render:
+Render asigna automáticamente el puerto 10000
+
+## Cómo correr el proyecto en local
+    1. Tener instalado Node 20.10.0
+    2. Instalar dependencias:
+        npm install
+    3. Iniciar el servidor:
+        npm start
+    
+    Salida esperada:
+    SQLite conectado: /database.db
+    Servidor corriendo en puerto 3000
+
+
+## 📌 ENDPOINTS
+   
+    CLIENTES
+        Obtener todos
+            GET /clientes
+        Obtener por ID
+            GET /clientes/:id
+        Crear
+            POST /clientes
+                Content-Type: application/json
+                {
+"nombre": "Tomas Merlo",
+"telefono": "11223344",
+"direccion": "Calle Falsa 123"
+}
+        Actualizar
+            PUT /clientes/:id
+        Eliminar
+            DELETE /clientes/:id
+    
+    PRODUCTOS
+        Obtener todos
+            GET /productos
+        Obtener por ID
+            GET /productos/:id
+        Crear
+            POST /productos
+            {
+            "nombre": "Oreos",
+            "precio": 1500,
+            "stock": 20
+            }
+        Actualizar
+            PUT /productos/:id
+        Eliminar
+            DELETE /productos/:id
+
+    PEDIDOS
+        Obtener todos los pedidos
+            GET /pedidos
+        Obtener un pedido por ID
+            GET /pedidos/:id
+        Obtener pedido completo
+            GET /pedidos/completo/:id
+        Crear pedido con detalles
+            POST /pedidos
+            {
+"id_cliente": 1,
+"detalles": [
+{ "id_producto": 1, "cantidad": 2 },
+{ "id_producto": 3, "cantidad": 1 }
+]
+}
+        Actualizar pedido
+            PUT /pedidos/:id
+        Eliminar pedido
+            DELETE /pedidos/:id
+
+    DETALLES
+        Obtener todos
+            GET /detalles
+        Obtener por ID
+            GET /detalles/:id
+        Obtener detalles de un pedido
+            GET /detalles/pedido/:id_pedido
+        Crear
+            POST /detalles
+            {
+  "id_pedido": 2,
+  "id_producto": 1,
+  "cantidad": 1,
+  "precio_unitario": 5000
+}
+        Actualizar pedido
+            PUT /detalles/:id
+        Eliminar detalle
+            DELETE /detalles/:id
+
+## Postman
+https://documenter.getpostman.com/view/24379146/2sB3dTrn7z
+
+
+
