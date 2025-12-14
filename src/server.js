@@ -1,7 +1,8 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
-const path = require("path");
+
+const createTables = require("./models/createTables");
 
 const clientesRoutes = require("./routes/clientesRoutes");
 const productosRoutes = require("./routes/productosRoutes");
@@ -23,13 +24,14 @@ app.use((req, res, next) => {
     next();
 });
 
+createTables();
+
 app.use("/clientes", clientesRoutes);
 app.use("/productos", productosRoutes);
 app.use("/pedidos", pedidosRoutes);
 app.use("/detalles", detallesRoutes);
 
 const PORT = process.env.PORT || 3000;
-
 app.listen(PORT, () => {
     console.log(`Servidor corriendo en puerto ${PORT}`);
 });

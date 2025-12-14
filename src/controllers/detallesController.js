@@ -3,107 +3,103 @@ const db = require("../config/db");
 module.exports = {
 
     getAll: (req, res) => {
-        try {
-            const query = `
-                SELECT detalles.*, productos.nombre AS producto_nombre
-                FROM detalles
-                LEFT JOIN productos ON detalles.id_producto = productos.id
-            `;
+        const query = `
+            SELECT detalles.*, productos.nombre AS producto_nombre
+            FROM detalles
+            LEFT JOIN productos ON detalles.id_producto = productos.id
+        `;
 
-            const rows = db.prepare(query).all();
+        db.all(query, [], (err, rows) => {
+            if (err) return res.status(500).json({ error: err.message });
             res.json(rows);
-
-        } catch (err) {
-            res.status(500).json({ error: err.message });
-        }
+        });
     },
 
     getById: (req, res) => {
-        try {
-            const query = `
-                SELECT detalles.*, productos.nombre AS producto_nombre
-                FROM detalles
-                LEFT JOIN productos ON detalles.id_producto = productos.id
-                WHERE detalles.id = ?
-            `;
+        const query = `
+            SELECT detalles.*, productos.nombre AS producto_nombre
+            FROM detalles
+            LEFT JOIN productos ON detalles.id_producto = productos.id
+            WHERE detalles.id = ?
+        `;
 
-            const row = db.prepare(query).get(req.params.id);
+        db.get(query, [req.params.id], (err, row) => {
+            if (err) return res.status(500).json({ error: err.message });
             res.json(row || {});
-
-        } catch (err) {
-            res.status(500).json({ error: err.message });
-        }
+        });
     },
 
     getByPedido: (req, res) => {
-        try {
-            const query = `
-                SELECT detalles.*, productos.nombre AS producto_nombre
-                FROM detalles
-                LEFT JOIN productos ON detalles.id_producto = productos.id
-                WHERE id_pedido = ?
-            `;
+        const query = `
+            SELECT detalles.*, productos.nombre AS producto_nombre
+            FROM detalles
+            LEFT JOIN productos ON detalles.id_producto = productos.id
+            WHERE id_pedido = ?
+        `;
 
-            const rows = db.prepare(query).all(req.params.id_pedido);
+        db.all(query, [req.params.id_pedido], (err, rows) => {
+            if (err) return res.status(500).json({ error: err.message });
             res.json(rows);
-
-        } catch (err) {
-            res.status(500).json({ error: err.message });
-        }
+        });
     },
 
     create: (req, res) => {
-        try {
-            const { id_pedido, id_producto, cantidad, precio_unitario } = req.body;
+        const { id_pedido, id_producto, cantidad, precio_unitario } = req.body;
 
-            const stmt = db.prepare(`
-                INSERT INTO detalles (id_pedido, id_producto, cantidad, precio_unitario)
-                VALUES (?, ?, ?, ?)
-            `);
+        const query = `
+            INSERT INTO detalles (id_pedido, id_producto, cantidad, precio_unitario)
+            VALUES (?, ?, ?, ?)
+        `;
 
-            const result = stmt.run(id_pedido, id_producto, cantidad, precio_unitario);
+        db.run(
+            query,
+            [id_pedido, id_producto, cantidad, precio_unitario],
+            function (err) {
+                if (err) return res.status(500).json({ error: err.message });
 
-            res.json({ id: result.lastInsertRowid, message: "Detalle agregado" });
-
-        } catch (err) {
-            res.status(500).json({ error: err.message });
-        }
+                res.json({
+                    id: this.lastID,
+                    message: "Detalle agregado"
+                });
+            }
+        );
     },
 
     update: (req, res) => {
-        try {
-            const { id_pedido, id_producto, cantidad, precio_unitario } = req.body;
+        const { id_pedido, id_producto, cantidad, precio_unitario } = req.body;
 
-            const stmt = db.prepare(`
-                UPDATE detalles
-                SET id_pedido = ?, id_producto = ?, cantidad = ?, precio_unitario = ?
-                WHERE id = ?
-            `);
+        const query = `
+            UPDATE detalles
+            SET id_pedido = ?, id_producto = ?, cantidad = ?, precio_unitario = ?
+            WHERE id = ?
+        `;
 
-            const result = stmt.run(
-                id_pedido,
-                id_producto,
-                cantidad,
-                precio_unitario,
-                req.params.id
-            );
+        db.run(
+            query,
+            [id_pedido, id_producto, cantidad, precio_unitario, req.params.id],
+            function (err) {
+                if (err) return res.status(500).json({ error: err.message });
 
-            res.json({ changes: result.changes, message: "Detalle actualizado" });
-
-        } catch (err) {
-            res.status(500).json({ error: err.message });
-        }
+                res.json({
+                    changes: this.changes,
+                    message: "Detalle actualizado"
+                });
+            }
+        );
     },
 
     remove: (req, res) => {
-        try {
-            const stmt = db.prepare("DELETE FROM detalles WHERE id = ?");
-            const result = stmt.run(req.params.id);
+        db.run(
+            "DELETE FROM detalles WHERE id = ?",
+            [req.params.id],
+            function (err) {
+                if (err) return res.status(500).json({ error: err.message });
 
-            res.json({ changes: result.changes, message: "Detalle eliminado" });
-
-        } catch (err) {
-            res.status(500).json({ error: err.message });
-        }
+                res.json({
+                    changes: this.changes,
+                    message: "Detalle eliminado"
+                });
+            }
+        );
     },
 };

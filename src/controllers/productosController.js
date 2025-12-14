@@ -1,62 +1,84 @@
 const db = require("../config/db");
 
 module.exports = {
+
     getAll: (req, res) => {
-        try {
-            const rows = db.prepare("SELECT * FROM productos").all();
+        db.all("SELECT * FROM productos", [], (err, rows) => {
+            if (err) {
+                return res.status(500).json({ error: err.message });
+            }
             res.json(rows);
-        } catch (err) {
-            res.status(500).json({ error: err.message });
-        }
+        });
     },
 
     getById: (req, res) => {
-        try {
-            const row = db.prepare("SELECT * FROM productos WHERE id = ?").get(req.params.id);
-            res.json(row || {});
-        } catch (err) {
-            res.status(500).json({ error: err.message });
-        }
+        db.get(
+            "SELECT * FROM productos WHERE id = ?",
+            [req.params.id],
+            (err, row) => {
+                if (err) {
+                    return res.status(500).json({ error: err.message });
+                }
+                res.json(row || {});
+            }
+        );
     },
 
     create: (req, res) => {
-        try {
-            const { nombre, precio, stock } = req.body;
-            const stmt = db.prepare(
-                "INSERT INTO productos (nombre, precio, stock) VALUES (?, ?, ?)"
-            );
+        const { nombre, precio, stock } = req.body;
 
-            const result = stmt.run(nombre, precio, stock);
-            res.json({ id: result.lastInsertRowid, message: "Producto creado" });
-        } catch (err) {
-            res.status(500).json({ error: err.message });
-        }
+        const query = `
+            INSERT INTO productos (nombre, precio, stock)
+            VALUES (?, ?, ?)
+        `;
+
+        db.run(query, [nombre, precio, stock], function (err) {
+            if (err) {
+                return res.status(500).json({ error: err.message });
+            }
+
+            res.json({
+                id: this.lastID,
+                message: "Producto creado"
+            });
+        });
     },
 
     update: (req, res) => {
-        try {
-            const { nombre, precio, stock } = req.body;
+        const { nombre, precio, stock } = req.body;
 
-            const stmt = db.prepare(
-                "UPDATE productos SET nombre = ?, precio = ?, stock = ? WHERE id = ?"
-            );
+        const query = `
+            UPDATE productos
+            SET nombre = ?, precio = ?, stock = ?
+            WHERE id = ?
+        `;
 
-            const result = stmt.run(nombre, precio, stock, req.params.id);
+        db.run(query, [nombre, precio, stock, req.params.id], function (err) {
+            if (err) {
+                return res.status(500).json({ error: err.message });
+            }
 
-            res.json({ changes: result.changes, message: "Producto actualizado" });
-        } catch (err) {
-            res.status(500).json({ error: err.message });
-        }
+            res.json({
+                changes: this.changes,
+                message: "Producto actualizado"
+            });
+        });
     },
 
     remove: (req, res) => {
-        try {
-            const stmt = db.prepare("DELETE FROM productos WHERE id = ?");
-            const result = stmt.run(req.params.id);
+        db.run(
+            "DELETE FROM productos WHERE id = ?",
+            [req.params.id],
+            function (err) {
+                if (err) {
+                    return res.status(500).json({ error: err.message });
+                }
 
-            res.json({ changes: result.changes, message: "Producto eliminado" });
-        } catch (err) {
-            res.status(500).json({ error: err.message });
-        }
+                res.json({
+                    changes: this.changes,
+                    message: "Producto eliminado"
+                });
+            }
+        );
     },
 };
